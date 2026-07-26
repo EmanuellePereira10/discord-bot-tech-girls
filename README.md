@@ -29,6 +29,7 @@ Colunas
 - titulo - título da notícia postada no TabNews
 - url - url da notícia
 - autor - identificação de quem postou a notícia no site
+- tag - classificador de assunto da notícia
 - postado_em - data em que a notícia foi postada no bot
 
 Tabela 2: canais_configurados
@@ -40,3 +41,18 @@ Colunas
 - id_guild - id do servidor discord
 - id_channel - identificador do discord
 - criado_em - data de criação do servidor
+
+
+## Dependências
+
+Para rodar o bot e os serviços de busca de notícias, o projeto utiliza as seguintes bibliotecas Python:
+
+* **`discord.py`**: Framework para interação com a API do Discord.
+* **`aiohttp`**: Biblioteca assíncrona para requisições HTTP (instalada automaticamente junto com o `discord.py`), utilizada na integração com a API do TabNews.
+* **`python-dotenv`**: Gerenciamento de variáveis de ambiente (chaves de API, ID do servidor de testes e tokens).
+
+### Para instalar as dependências
+No terminal, instale os pacotes necessários:
+
+```bash
+pip install discord.py python-dotenv
