@@ -1,4 +1,5 @@
 import sqlite3
+
 def inserir_noticia(titulo, autor, url, postado_em, tag):
     conexao = sqlite3.connect("bot.db")
     cursor = conexao.cursor()

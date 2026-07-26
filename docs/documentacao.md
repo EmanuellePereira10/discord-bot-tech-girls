@@ -53,10 +53,7 @@ O projeto utiliza um *agente de IA* para ler o conteúdo completo de cada notíc
 
 Projeto desenvolvido em equipe como parte do *Tech Girls Challenge #1* 
 
-THAIS 
-
-MARIA 
-
-ANDRESSA 
-
-LUCILA 
+- Thais
+- Maria Fernanda
+- Andressa 
+- Lucila
