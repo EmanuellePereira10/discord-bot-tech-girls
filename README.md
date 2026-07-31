@@ -42,6 +42,68 @@ Colunas
 - id_channel - identificador do discord
 - criado_em - data de criação do servidor
 
+## Como rodar com Docker
+
+### Pré-requisitos
+
+- Docker instalado
+- Docker Compose instalado (ou plugin `docker compose`)
+
+### 1) Configurar variáveis de ambiente
+
+Na raiz do projeto, crie seu arquivo `.env` a partir do exemplo:
+
+```bash
+cp .env.example .env
+```
+
+Edite o arquivo `.env` e preencha, no mínimo:
+
+- `GEMINI_API_KEY`
+
+Observação:
+- `BOT_TOKEN` e `DEV_GUILD_ID` só são necessários quando for executar o bot completo no Discord.
+
+### 2) Build da imagem
+
+```bash
+docker compose build
+```
+
+### 3) Subir a aplicação
+
+```bash
+docker compose up
+```
+
+Para rodar em segundo plano:
+
+```bash
+docker compose up -d
+```
+
+### 4) Ver logs da execução
+
+```bash
+docker compose logs -f
+```
+
+### 5) Parar os containers
+
+```bash
+docker compose down
+```
+
+## Fluxo executado no container hoje
+
+O container está configurado para executar o arquivo `main_teste.py`, que faz:
+
+1. Busca notícias na API do TabNews
+2. Envia conteúdo para validação no Gemini
+3. Exibe no terminal o JSON retornado pela validação
+
+Os arquivos em `Validador_IA/dados_teste/` são apenas artefatos de teste e não fazem parte do fluxo final de produção.
+
 
 ## Dependências
 
