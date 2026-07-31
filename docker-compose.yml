@@ -1,0 +1,11 @@
+services:
+  validador:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: techgirls-validador
+    env_file:
+      - .env
+    working_dir: /app
+    command: python main_teste.py
+    restart: unless-stopped
