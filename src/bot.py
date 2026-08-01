@@ -17,7 +17,9 @@ class TechNews(commands.Bot):
         super().__init__(command_prefix="/", intents=intents)
 
     async def setup_hook(self):
-        await self.load_extension("cogs.tasks")
+        await self.load_extension("cogs.tasks_teste") #Por enquanto esta sendo usada a de teste
+        print("Cog de tasks conectada com sucesso!")
+        
         await self.load_extension("cogs.setup_channel")
         await self.load_extension("cogs.teste_embed")
         
