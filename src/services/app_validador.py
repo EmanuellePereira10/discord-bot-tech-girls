@@ -16,6 +16,133 @@ from google.genai import types
 load_dotenv()
 
 
+def _retorno_invalido(motivo: str) -> Dict[str, Any]:
+    """Retorno padronizado para respostas inválidas do validador."""
+    return {"relevante": False, "justificativa": motivo}
+
+
+def _url_valida(url: str) -> bool:
+    """Valida se a URL está em formato HTTP/HTTPS simples."""
+    return bool(re.match(r"^https?://\S+$", url.strip()))
+
+
+def _normalizar_resumo(texto: str) -> str:
+    """Normaliza o resumo preservando as quebras de linha relevantes."""
+    linhas = [linha.strip() for linha in texto.replace("\r\n", "\n").split("\n")]
+    linhas = [linha for linha in linhas if linha]
+    return "\n".join(linhas)
+
+
+def _validar_resumo_3_linhas(texto: str, max_palavras_por_linha: int = 15) -> tuple[bool, Optional[str], Optional[str]]:
+    """Valida se o resumo possui exatamente 3 linhas e até 15 palavras por linha."""
+    if not isinstance(texto, str) or not texto.strip():
+        return False, None, "Campo 'texto-resumo' ausente ou vazio."
+
+    resumo = _normalizar_resumo(texto)
+    linhas = resumo.split("\n")
+
+    if len(linhas) != 3:
+        return False, None, "Campo 'texto-resumo' deve conter exatamente 3 linhas."
+
+    for idx, linha in enumerate(linhas, start=1):
+        palavras = linha.split()
+        if len(palavras) > max_palavras_por_linha:
+            return (
+                False,
+                None,
+                f"Linha {idx} de 'texto-resumo' excede {max_palavras_por_linha} palavras.",
+            )
+
+    return True, resumo, None
+
+
+def _validar_tags(tags: Any, max_tags: int = 3) -> tuple[bool, Optional[list[str]], Optional[str]]:
+    """Valida e normaliza as tags para lista curta de strings."""
+    if not isinstance(tags, list):
+        return False, None, "Campo 'tags' deve ser uma lista."
+
+    tags_normalizadas: list[str] = []
+    for item in tags:
+        if not isinstance(item, str):
+            return False, None, "Todas as 'tags' devem ser strings."
+
+        tag_limpa = item.strip()
+        if tag_limpa:
+            tags_normalizadas.append(tag_limpa)
+
+    # Remove duplicadas preservando a ordem
+    tags_unicas = list(dict.fromkeys(tags_normalizadas))
+
+    if not tags_unicas:
+        return False, None, "Campo 'tags' não pode estar vazio."
+
+    if len(tags_unicas) > max_tags:
+        return False, None, f"Campo 'tags' deve conter no máximo {max_tags} itens."
+
+    return True, tags_unicas, None
+
+
+def _validar_payload_rejeitado(payload: Dict[str, Any]) -> tuple[bool, Optional[str]]:
+    """Valida o contrato para respostas rejeitadas."""
+    justificativa = payload.get("justificativa")
+    if not isinstance(justificativa, str) or not justificativa.strip():
+        return False, "Campo 'justificativa' é obrigatório quando relevante=false."
+    return True, None
+
+
+def _validar_payload_aprovado(payload: Dict[str, Any], target_url: str) -> tuple[bool, Optional[Dict[str, Any]], Optional[str]]:
+    """Valida e normaliza o contrato para respostas aprovadas."""
+    titulo = payload.get("titulo")
+    if not isinstance(titulo, str) or not titulo.strip():
+        return False, None, "Campo 'titulo' é obrigatório quando relevante=true."
+
+    ok_tags, tags_validadas, erro_tags = _validar_tags(payload.get("tags"))
+    if not ok_tags:
+        return False, None, erro_tags
+
+    ok_resumo, resumo_normalizado, erro_resumo = _validar_resumo_3_linhas(payload.get("texto-resumo"))
+    if not ok_resumo:
+        return False, None, erro_resumo
+
+    payload_final = {
+        "relevante": True,
+        "titulo": titulo.strip(),
+        "tags": tags_validadas,
+        "texto-resumo": resumo_normalizado,
+        "link-de-acesso": target_url,
+    }
+
+    if not _url_valida(payload_final["link-de-acesso"]):
+        return False, None, "Campo 'link-de-acesso' inválido."
+
+    return True, payload_final, None
+
+
+def _validar_payload_ia(payload: Any, target_url: str) -> Dict[str, Any]:
+    """Orquestra a validação final do payload retornado pela IA."""
+    if not isinstance(payload, dict):
+        return _retorno_invalido("Resposta da IA deve ser um objeto JSON.")
+
+    if "relevante" not in payload or not isinstance(payload.get("relevante"), bool):
+        return _retorno_invalido("Campo 'relevante' ausente ou inválido no retorno da IA.")
+
+    if payload["relevante"] is False:
+        ok_rejeitado, erro_rejeitado = _validar_payload_rejeitado(payload)
+        if not ok_rejeitado:
+            return _retorno_invalido(erro_rejeitado or "Payload rejeitado inválido.")
+
+        return {
+            "relevante": False,
+            "justificativa": payload["justificativa"].strip(),
+        }
+
+    ok_aprovado, payload_aprovado, erro_aprovado = _validar_payload_aprovado(payload, target_url)
+    if not ok_aprovado:
+        return _retorno_invalido(erro_aprovado or "Payload aprovado inválido.")
+
+    return payload_aprovado or _retorno_invalido("Falha ao normalizar resposta aprovada.")
+
+
 def _obter_caminho_prompt() -> str:
     """
     Retorna o caminho absoluto dinâmico para o arquivo docs/leitura_de_noticias.md,
@@ -83,19 +210,13 @@ async def enviar_para_ia_validar(url_noticia: str) -> Optional[Dict[str, Any]]:
     """
     if not url_noticia:
         print("[Validador] Erro: Nenhuma URL fornecida para validação.")
-        return {
-            "relevante": False,
-            "justificativa": "Nenhuma URL fornecida para validação."
-        }
+        return _retorno_invalido("Nenhuma URL fornecida para validação.")
 
     # 1. Sanitiza a URL informada
     target_url = extrair_url(url_noticia)
     if not target_url.startswith("http"):
         print(f"[Validador] Erro: URL inválida fornecida: '{url_noticia}'")
-        return {
-            "relevante": False,
-            "justificativa": f"URL inválida: {url_noticia}"
-        }
+        return _retorno_invalido(f"URL inválida: {url_noticia}")
 
     # 2. Carrega as regras de curadoria contidas em docs/leitura_de_noticias.md
     caminho_prompt = _obter_caminho_prompt()
@@ -104,10 +225,7 @@ async def enviar_para_ia_validar(url_noticia: str) -> Optional[Dict[str, Any]]:
             prompt_sistema = f.read()
     except FileNotFoundError:
         print(f"[Validador] Erro: Arquivo de prompt não encontrado em '{caminho_prompt}'")
-        return {
-            "relevante": False,
-            "justificativa": f"Arquivo de regras não encontrado: {caminho_prompt}"
-        }
+        return _retorno_invalido(f"Arquivo de regras não encontrado: {caminho_prompt}")
 
     print(f"-> [Web Scraping] Acessando a página: {target_url}...")
 
@@ -115,10 +233,7 @@ async def enviar_para_ia_validar(url_noticia: str) -> Optional[Dict[str, Any]]:
     texto_noticia = await asyncio.to_thread(extrair_conteudo_pagina, target_url)
     if not texto_noticia:
         print(f"[Validador] Não foi possível extrair o conteúdo de: {target_url}")
-        return {
-            "relevante": False,
-            "justificativa": "Falha ao extrair o conteúdo da página para análise."
-        }
+        return _retorno_invalido("Falha ao extrair o conteúdo da página para análise.")
 
     print("-> [IA] Enviando conteúdo para análise do Gemini...")
 
@@ -126,10 +241,7 @@ async def enviar_para_ia_validar(url_noticia: str) -> Optional[Dict[str, Any]]:
     api_key = os.getenv("GEMINI_API_KEY")
     if not api_key:
         print("[Validador] Erro: A variável de ambiente GEMINI_API_KEY não foi encontrada.")
-        return {
-            "relevante": False,
-            "justificativa": "Chave de API do Gemini (GEMINI_API_KEY) não configurada."
-        }
+        return _retorno_invalido("Chave de API do Gemini (GEMINI_API_KEY) não configurada.")
 
     # 5. Chamada à API do Gemini usando o SDK google-genai (com fallback de modelos)
     modelos_candidatos = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash"]
@@ -158,10 +270,7 @@ async def enviar_para_ia_validar(url_noticia: str) -> Optional[Dict[str, Any]]:
 
     if not resposta or not resposta.text:
         print(f"[Validador] Erro na comunicação com a API do Gemini: {ultimo_erro}")
-        return {
-            "relevante": False,
-            "justificativa": f"Erro de comunicação com o serviço de IA: {str(ultimo_erro)}"
-        }
+        return _retorno_invalido(f"Erro de comunicação com o serviço de IA: {str(ultimo_erro)}")
 
     raw_text = resposta.text
     texto_limpo = limpar_resposta_json(raw_text)
@@ -171,14 +280,12 @@ async def enviar_para_ia_validar(url_noticia: str) -> Optional[Dict[str, Any]]:
         dados_validacao = json.loads(texto_limpo)
     except json.JSONDecodeError as exc:
         print(f"[Validador] Erro ao decodificar JSON retornado pela IA: {exc}")
-        return {
-            "relevante": False,
-            "justificativa": "Resposta da IA não veio em formato JSON válido."
-        }
+        return _retorno_invalido("Resposta da IA não veio em formato JSON válido.")
 
-    # 7. Formatação da Saída
+    # 7. Validação final do contrato retornado pela IA
+    dados_validacao = _validar_payload_ia(dados_validacao, target_url)
+
     if dados_validacao.get("relevante") is True:
-        dados_validacao["link-de-acesso"] = target_url
         print("\n=== NOTÍCIA APROVADA COM SUCESSO! ===")
         print(json.dumps(dados_validacao, indent=4, ensure_ascii=False))
         print("=====================================\n")
