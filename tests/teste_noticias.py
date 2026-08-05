@@ -1,6 +1,6 @@
 import asyncio
 from pprint import pprint
-from news_search import search_news
+from services.news_search import search_news
 
 async def testar():
     urls, noticias = await search_news()
