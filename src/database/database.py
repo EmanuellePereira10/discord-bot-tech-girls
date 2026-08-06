@@ -2,11 +2,11 @@ import sqlite3
 
 #Inicializa o banco criando as tabelas
 def inicializar_banco():
-    conexao = sqlite3.connect("bot.db")
+    conexao = sqlite3.connect("bot_teste.db")
     cursor = conexao.cursor()
     
-    # Lê o arquivo SQL e executa todo o script de uma vez
-    with open("database/criacao_schema.sql", "r", encoding="utf-8") as f:
+    #Le o arquivo e executa todo o script de uma vez
+    with open("src/database/criacao_schema.sql", "r", encoding="utf-8") as f:
         script_sql = f.read()
         
     cursor.executescript(script_sql)
@@ -15,7 +15,7 @@ def inicializar_banco():
 
 #Insere as noticias "publicadas" no discord no banco de dados para evitar noticias duplicadas
 def inserir_noticia(id_noticia, titulo, autor, url, postado_em, tag):
-    conexao = sqlite3.connect("bot.db")
+    conexao = sqlite3.connect("bot_teste.db")
     cursor = conexao.cursor()
 
     try:
@@ -29,7 +29,7 @@ def inserir_noticia(id_noticia, titulo, autor, url, postado_em, tag):
     
 #Busca as noticias no banco de dados
 def buscar_noticias(id_noticia):
-    conexao = sqlite3.connect("bot.db")
+    conexao = sqlite3.connect("bot_teste.db")
     cursor = conexao.cursor()
     cursor.execute("SELECT id_noticia, titulo, autor, url, postado_em, tag FROM noticias_postadas WHERE id_noticia = ?", (id_noticia,))
     resultado = cursor.fetchone()
@@ -41,7 +41,7 @@ def buscar_noticias(id_noticia):
     
 #Busca os canais configurados para o envio das noticias
 def buscar_servidores():
-    conexao = sqlite3.connect("bot.db")
+    conexao = sqlite3.connect("bot_teste.db")
     cursor = conexao.cursor()
     cursor.execute("SELECT id_channel FROM canais_configurados") #Busca apenas a de id que sera usada
     resultado = cursor.fetchall()
@@ -54,7 +54,7 @@ def buscar_servidores():
     
 #Insere o id do canal e do servidor onde serao encaminhadas no banco de dados
 def inserir_canal_servidor(id_guild, id_channel, criado_em):
-    conexao = sqlite3.connect("bot.db")
+    conexao = sqlite3.connect("bot_teste.db")
     cursor = conexao.cursor()
     cursor.execute("INSERT INTO canais_configurados(id_guild, id_channel, criado_em) VALUES (?, ?, ?)", (id_guild, id_channel, criado_em))
     conexao.commit()

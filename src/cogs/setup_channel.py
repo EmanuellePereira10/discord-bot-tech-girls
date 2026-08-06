@@ -21,8 +21,8 @@ class SetupChannel(commands.Cog):
         task_cog = self.bot.get_cog("TasksBot")
         
         if task_cog:
-            if not task_cog.search_task.is_running(): #Remover _teste apos conclusao
-                task_cog.search_task.start()
+            if not task_cog.main_task.is_running(): #Remover _teste apos conclusao
+                task_cog.main_task.start()
 
     @channel.error
     async def channel_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
