@@ -21,16 +21,18 @@ class TechNews(commands.Bot):
         inicializar_banco() #Inicia as tabelas do SQLite se elas nao existirem
         
         await self.load_extension("cogs.tasks")
-        print("Cog de tasks conectada com sucesso!")
+        print("Tasks de automatizacao conectada com sucesso!")
         
         await self.load_extension("cogs.setup_channel")
         # await self.load_extension("cogs.teste_embed")
         
-        self.tree.copy_global_to(guild=GUILD_ID) #Copia os comandos globais para o servidor de testes
+        if GUILD_ID:
+            self.tree.clear_commands(guild=GUILD_ID)
+            await self.tree.sync(guild=GUILD_ID)
 
-        synced = await self.tree.sync(guild=GUILD_ID) #Sincroniza os comandos diretamente no servidor
+        synced = await self.tree.sync()
         
-        print(f"Comandos prontos e ativos: {[cmd.name for cmd in synced]}")
+        print(f"Comandos ativos: {[cmd.name for cmd in synced]}")
         
 bot = TechNews()
 
