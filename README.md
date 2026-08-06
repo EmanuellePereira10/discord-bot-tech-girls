@@ -46,8 +46,8 @@ Colunas
 
 ### Pré-requisitos
 
-- Docker instalado
-- Docker Compose instalado (ou plugin `docker compose`)
+- [Docker](https://docs.docker.com/get-docker/) instalado
+- [Docker Compose](https://docs.docker.com/compose/install/) instalado (versão com plugin: `docker compose`)
 
 ### 1) Configurar variáveis de ambiente
 
@@ -57,12 +57,15 @@ Na raiz do projeto, crie seu arquivo `.env` a partir do exemplo:
 cp .env.example .env
 ```
 
-Edite o arquivo `.env` e preencha, no mínimo:
+Edite o arquivo `.env` e preencha **todas** as variáveis obrigatórias:
 
-- `GEMINI_API_KEY`
+| Variável | Obrigatória para | Descrição |
+|---|---|---|
+| `GEMINI_API_KEY` | Validação de notícias | Chave da API do Google Gemini |
+| `BOT_TOKEN` | Bot Discord completo | Token do bot gerado no Discord Developer Portal |
+| `DEV_GUILD_ID` | Bot Discord completo | ID do servidor Discord para sincronização de comandos |
 
-Observação:
-- `BOT_TOKEN` e `DEV_GUILD_ID` só são necessários quando for executar o bot completo no Discord.
+> **Atenção:** sem o `BOT_TOKEN` e o `DEV_GUILD_ID` o bot se conectará mas não conseguirá sincronizar nenhum comando no servidor Discord.
 
 ### 2) Build da imagem
 
@@ -94,15 +97,15 @@ docker compose logs -f
 docker compose down
 ```
 
-## Fluxo executado no container hoje
+## Fluxo executado no container
 
-O container está configurado para executar o arquivo `main_teste.py`, que faz:
+O container executa o arquivo `src/bot.py`, que realiza em sequência:
 
-1. Busca notícias na API do TabNews
-2. Envia conteúdo para validação no Gemini
-3. Exibe no terminal o JSON retornado pela validação
-
-Os arquivos em `Validador_IA/dados_teste/` são apenas artefatos de teste e não fazem parte do fluxo final de produção.
+1. Carrega as variáveis de ambiente do arquivo `.env`
+2. Inicializa as tabelas do banco de dados SQLite (`bot.db`) caso ainda não existam
+3. Conecta os "cogs" de tarefas (`tasks`) e configuração de canal (`setup_channel`)
+4. Sincroniza os slash commands no servidor Discord configurado em `DEV_GUILD_ID`
+5. Mantém o bot online e aguarda os horários programados (08h, 14h, 20h e 02h, horário de Brasília) para buscar e publicar notícias via TabNews + validação Gemini
 
 
 ## Dependências
