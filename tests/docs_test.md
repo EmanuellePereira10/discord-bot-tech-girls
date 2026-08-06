@@ -24,7 +24,7 @@ Os testes têm como objetivo garantir que:
 ### 1. `teste_noticias.py`
 * **Objetivo:** Valida a busca e retorno de notícias da `services/news_search.py`.
 * **O que testa:**
-  * Retorno correto da Url/API e Corpo das notícias.
+  * Retorno correto da API em dicionario e Corpo das notícias.
 
 ### 2. `teste_embed.py`
 * **Objetivo:** Garante que a criação de `discord.Embed` em `utils/embeds.py` ocorra sem falhas.

@@ -3,12 +3,10 @@ from pprint import pprint
 from services.news_search import search_news
 
 async def testar():
-    urls, noticias = await search_news()
+    noticias = await search_news()
     
-    print("============TESTANDO URLS=============")
-    pprint(urls)
-    
+    noticias_teste = noticias[:3]
     print("\n============TESTANDO DICIONARIOS=============")
-    pprint(noticias if noticias else "Lista vazia")
+    pprint(noticias_teste if noticias_teste else "Lista vazia")
 
 asyncio.run(testar()) 

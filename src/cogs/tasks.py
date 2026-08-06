@@ -25,13 +25,14 @@ class TasksBot(commands.Cog):
             print("\nNenhum canal registrado no banco, cancelando execução das tasks")
             return
         
-        urls_list, dados_banco = await search_news()
-        for noticia in reversed(dados_banco):
+        noticias = await search_news()
+        for noticia in reversed(noticias):
             if buscar_noticias(noticia['id_noticia']): #Busca as noticias no banco para ver se existem, se sim, pula
                 continue
             
             # Envia para a IA
             resultado_ia = await enviar_para_ia_validar(noticia['url'])
+            #resultado_ia = await enviar_para_ia_validar(noticia) para retornar o dicionario inteiro com o conteudo + titulo,etc
             
             await asyncio.sleep(5) #Pausa para nao estourar o limite de requisicoes
             
