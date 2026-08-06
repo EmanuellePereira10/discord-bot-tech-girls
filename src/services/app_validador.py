@@ -5,11 +5,8 @@ import re
 import urllib.request
 from typing import Any, Dict, Optional
 from bs4 import BeautifulSoup
-# pyrefly: ignore [missing-import]
 from dotenv import load_dotenv
-# pyrefly: ignore [missing-import]
 from google import genai
-# pyrefly: ignore [missing-import]
 from google.genai import types
 
 # Carrega variáveis de ambiente (.env)
@@ -244,7 +241,7 @@ async def enviar_para_ia_validar(url_noticia: str) -> Optional[Dict[str, Any]]:
         return _retorno_invalido("Chave de API do Gemini (GEMINI_API_KEY) não configurada.")
 
     # 5. Chamada à API do Gemini usando o SDK google-genai (com fallback de modelos)
-    modelos_candidatos = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash"]
+    modelos_candidatos = ["gemini-3.6-flash", "gemini-2.0-flash", "gemini-3.5-flash"]
     client = genai.Client(api_key=api_key)
     conteudo_prompt = f"{prompt_sistema}\n\nConteúdo da Notícia:\n{texto_noticia}"
 

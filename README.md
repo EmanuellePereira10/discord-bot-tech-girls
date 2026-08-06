@@ -93,6 +93,10 @@ docker compose logs -f
 
 ### 5) Parar os containers
 
+No terminal clique CTRL + C
+
+Em seguida, rode:
+
 ```bash
 docker compose down
 ```
