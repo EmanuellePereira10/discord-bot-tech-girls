@@ -16,14 +16,20 @@ class SetupChannel(commands.Cog):
         inserir_canal_servidor(id_guild=str(interaction.guild.id), id_channel=str(interaction.channel.id), criado_em=data_atual)
         
         await interaction.response.send_message(f'Canal para noticias configurado com sucesso!')
-        print(interaction.channel.id, interaction.guild.id)     
+        # print(interaction.channel.id, interaction.guild.id) Mostra o id do canal e do servidor no console
         
         task_cog = self.bot.get_cog("TasksBot")
         
         if task_cog:
-            if not task_cog.search_task.is_running(): #Remover _teste apos conclusao
-                task_cog.search_task.start()
+            #Inicia a task de busca se ela não estiver rodando
+            if not task_cog.busca_task.is_running():
+                task_cog.busca_task.start()
+                
+            #Inicia a task de envio se ela não estiver rodando
+            if not task_cog.envio_task.is_running():
+                task_cog.envio_task.start()
 
+    #Da erro caso alguem nao administrador tente rodar o comando
     @channel.error
     async def channel_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
         if isinstance(error, app_commands.errors.MissingPermissions):
@@ -31,5 +37,4 @@ class SetupChannel(commands.Cog):
           
 
 async def setup(bot):
-
     await bot.add_cog(SetupChannel(bot))

@@ -10,22 +10,29 @@ async def search_news(): #busca as noticias na API
                 if resposta.status == 200:
                     news_list = await resposta.json()
 
-                    urls_list = []
-
-                    db_list = []
+                    lista_noticias = []
                    
                     for x in news_list:
-                        news_info = {'id_noticia' : x['id'], 'titulo' : x['title'], 'url' : f"https://www.tabnews.com.br/{x['owner_username']}/{x['slug']}", 'autor' : x['owner_username'], 'tag' : 'tecnologia', 'postado_em' :  x['published_at']}
+                        
+                        url_individual = f"https://www.tabnews.com.br/api/v1/contents/{x['owner_username']}/{x['slug']}"
+                        
+                        async with session.get(url_individual) as resp_post:
+                            if resp_post.status == 200:
+                                post_completo = await resp_post.json()
+                                texto_body = post_completo.get('body', '')
+                            else:
+                                texto_body = ''
+                        
+                        news_info = {'id_noticia' : x['id'], 'titulo' : x['title'], 'url' : f"https://www.tabnews.com.br/{x['owner_username']}/{x['slug']}", 'autor' : x['owner_username'], 'tag' : 'tecnologia', 'postado_em' :  x['published_at'], 'conteudo' : texto_body}
 
-                        db_list.append(news_info)
-                        urls_list.append(news_info['url'])  
+                        lista_noticias.append(news_info)  
 
-                    return urls_list, db_list
+                    return lista_noticias
 
                 else:
                     print("Não foi possível carregar as notícias no momento.")
-                    return [], []
+                    return []
 
     except Exception as e:
         print(f"Erro ao buscar notícias: {e}")
-        return [], []
+        return []
