@@ -2,7 +2,6 @@ import asyncio
 import json
 import os
 import sys
-# pyrefly: ignore [missing-import]
 from dotenv import load_dotenv
 
 # Injeta a raiz do projeto no sys.path para evitar ModuleNotFoundError

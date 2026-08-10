@@ -24,6 +24,7 @@ class TechNews(commands.Bot):
         print("Tasks de automatizacao conectada com sucesso!")
         
         await self.load_extension("cogs.setup_channel")
+        await self.load_extension("cogs.jobs_tasks")
         # await self.load_extension("cogs.teste_embed")
         
         if GUILD_ID:
