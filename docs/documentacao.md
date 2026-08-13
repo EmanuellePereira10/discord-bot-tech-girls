@@ -98,15 +98,28 @@ falta o print
 
 #### Embeds publicados no Discord:
 
-falta o print 
+<img width="491" height="207" alt="Screenshot 2026-08-12 224247 disc1" src="https://github.com/user-attachments/assets/48e7cb7c-bd6d-45b8-bbc1-416953af4112" />
+
 
 #### Comando /setupnews:
 
 <img width="902" height="394" alt="Screenshot 2026-08-12 213908" src="https://github.com/user-attachments/assets/f1035cf7-db71-4a8e-99cd-5df54eadd345" />
  
-
 ---
+## 🚧 Em desenvolvimento: canal de vagas
 
+Além das notícias de tecnologia, o bot também está ganhando um segundo fluxo: o envio automático de vagas de emprego e freelance num canal separado (vagas).
+
+O que já funciona:
+
+O comando /setupjobs já configura o canal vagas com sucesso, do mesmo jeito que o /setupnews configura o canal de notícias
+O banco de dados já foi atualizado para suportar os dois fluxos (notícias e vagas) de forma independente, com uma coluna tipo que diferencia o que é canal de notícia e o que é canal de vaga
+
+O que ainda está em ajuste:
+
+A busca e o envio das vagas em si ainda não estão funcionando de ponta a ponta — o processo não está retornando nada no console ainda, e a equipe está depurando essa parte
+
+--- 
 ## Estrutura do projeto
 
 - bot.py — inicia o bot e realiza a conexão com o Discord.
