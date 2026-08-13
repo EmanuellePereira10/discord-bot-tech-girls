@@ -70,9 +70,23 @@ Isso permite que o bot não apenas copie notícias, mas processe e organize o co
 
 Após a publicação, as informações processadas são armazenadas no banco de dados.
 
-O armazenamento também é utilizado para verificar se uma notícia ou URL já foi publicada anteriormente.
+O armazenamento também é utilizado para verificar se uma notícia ou URL já foi publicada anteriormente. Dessa forma, antes de iniciar um novo ciclo de processamento, o sistema consulta o banco para evitar notícias duplicadas.
 
-Dessa forma, antes de iniciar um novo ciclo de processamento, o sistema consulta o banco para evitar notícias duplicadas.
+#### Tabela noticias_postadas — guarda o ID da notícia, evitando duplicidade:
+
+- id_noticia — id da notícia conforme no site TabNews
+- titulo — título da notícia postada no TabNews
+- url — url da notícia
+- autor — identificação de quem postou a notícia no site
+- tag — classificador de assunto da notícia
+- postado_em — data em que a notícia foi postada no bot
+
+#### Tabela canais_configurados — guarda em qual servidor/canal o bot deve postar:
+
+- id_canal — id gerado internamente para o canal de notícias
+- id_guild — id do servidor Discord
+- id_channel — identificador do canal no Discord
+- criado_em — data de criação do registro
 
 ---
 
@@ -86,9 +100,10 @@ falta o print
 
 falta o print 
 
-#### Comando /setupchannel:
+#### Comando /setupnews:
 
-falta o print 
+<img width="902" height="394" alt="Screenshot 2026-08-12 213908" src="https://github.com/user-attachments/assets/f1035cf7-db71-4a8e-99cd-5df54eadd345" />
+ 
 
 ---
 
