@@ -16,11 +16,11 @@ class TasksBot(commands.Cog):
         self.busca_task.cancel()
         self.envio_task.cancel()
 
-    @tasks.loop(minutes=10)
+    @tasks.loop(minutes=1)
     async def busca_task(self):
         print("\n\nTarefa de automatização Rodando!")
         
-        canais = buscar_servidores()
+        canais = buscar_servidores("noticias")
         if canais == []: #Por seguranca caso rode sem o setupnews
             print("\nNenhum canal registrado no banco, cancelando execução das tasks")
             return
@@ -43,12 +43,12 @@ class TasksBot(commands.Cog):
                     "dados_banco": noticia
                 })
 
-    @tasks.loop(minutes=15)
+    @tasks.loop(minutes=1)
     async def envio_task(self):
         if not self.fila_noticias:
             return
             
-        canais = buscar_servidores()
+        canais = buscar_servidores("noticias")
         
         noticia_para_enviar = self.fila_noticias.pop(0)
         resultado_ia = noticia_para_enviar["resultado_ia"]

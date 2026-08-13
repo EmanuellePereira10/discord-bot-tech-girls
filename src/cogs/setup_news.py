@@ -13,7 +13,7 @@ class SetupChannel(commands.Cog):
     async def channel(self, interaction: discord.Interaction):
         
         data_atual = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        inserir_canal_servidor(id_guild=str(interaction.guild.id), id_channel=str(interaction.channel.id), criado_em=data_atual)
+        inserir_canal_servidor(id_guild=str(interaction.guild.id), id_channel=str(interaction.channel.id), tipo="noticias", criado_em=data_atual)
         
         await interaction.response.send_message(f'Canal para noticias configurado com sucesso!')
         # print(interaction.channel.id, interaction.guild.id) Mostra o id do canal e do servidor no console

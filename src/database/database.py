@@ -1,6 +1,6 @@
 import sqlite3
 
-#Inicializa o banco criando as tabelas
+# --- Inicializa o banco criando as tabelas ---
 def inicializar_banco():
     conexao = sqlite3.connect("bot_teste.db")
     cursor = conexao.cursor()
@@ -13,7 +13,8 @@ def inicializar_banco():
     conexao.commit()
     conexao.close()
 
-#Insere as noticias "publicadas" no discord no banco de dados para evitar noticias duplicadas
+
+#--- Insere as noticias "publicadas" no discord no banco de dados para evitar noticias duplicadas ---
 def inserir_noticia(id_noticia, titulo, autor, url, postado_em, tag):
     conexao = sqlite3.connect("bot_teste.db")
     cursor = conexao.cursor()
@@ -27,7 +28,8 @@ def inserir_noticia(id_noticia, titulo, autor, url, postado_em, tag):
         resultado = cursor.fetchone()
         return ("noticia recusada", resultado[0])
     
-#Busca as noticias no banco de dados
+    
+# --- Busca as noticias no banco de dados ---
 def buscar_noticias(id_noticia):
     conexao = sqlite3.connect("bot_teste.db")
     cursor = conexao.cursor()
@@ -39,24 +41,30 @@ def buscar_noticias(id_noticia):
     else:
         return False #Passa a retornar false
     
-#Busca os canais configurados para o envio das noticias
-def buscar_servidores():
+    
+# --- Busca os canais configurados para o envio das noticias ---
+def buscar_servidores(tipo):
     conexao = sqlite3.connect("bot_teste.db")
     cursor = conexao.cursor()
-    cursor.execute("SELECT id_channel FROM canais_configurados") #Busca apenas a de id que sera usada
+
+    # Adiciona a filtragem pelo tipo do canal ('noticias' ou 'vagas')
+    cursor.execute(
+        "SELECT id_channel FROM canais_configurados WHERE tipo = ?", (tipo,)
+    )
     resultado = cursor.fetchall()
-    
-    #Valida se a lista nao esta vazia, garante que seja um int e gera uma lista
+    conexao.close()
+
     if resultado:
         return [int(linha[0]) for linha in resultado]
     else:
-        return [] #Retorna uma lista vazia para nao dar erro
+        return []
     
-#Insere o id do canal e do servidor onde serao encaminhadas no banco de dados
-def inserir_canal_servidor(id_guild, id_channel, criado_em):
+    
+# --- Insere o id do canal e do servidor onde serao encaminhadas no banco de dados ---
+def inserir_canal_servidor(id_guild, id_channel, tipo, criado_em):
     conexao = sqlite3.connect("bot_teste.db")
     cursor = conexao.cursor()
-    cursor.execute("INSERT INTO canais_configurados(id_guild, id_channel, criado_em) VALUES (?, ?, ?)", (id_guild, id_channel, criado_em))
+    cursor.execute("INSERT INTO canais_configurados(id_guild, id_channel, tipo, criado_em) VALUES (?, ?, ?, ?)", (id_guild, id_channel, tipo, criado_em))
     conexao.commit()
     id_gerado = cursor.lastrowid
     return ("canal inserido", id_gerado)

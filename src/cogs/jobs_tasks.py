@@ -1,40 +1,8 @@
 import discord
 from discord.ext import commands, tasks
-
 from database.database import buscar_servidores
 from services.jobs_search import search_jobs
-
-
-class VagaView(discord.ui.View):
-	def __init__(self, url: str, fonte: str | None = None):
-		super().__init__()
-		label = "Acessar vaga"
-		if fonte:
-			label = f"Ver no {fonte}"[:80]
-		self.add_item(
-			discord.ui.Button(
-				label=label,
-				url=url,
-				style=discord.ButtonStyle.link,
-				emoji="🔗",
-			)
-		)
-
-
-def criar_embed_vaga(vaga: dict) -> tuple[discord.Embed, discord.ui.View]:
-	titulo = vaga.get("titulo") or "Vaga Tech"
-	url = vaga.get("link") or ""
-	fonte = vaga.get("fonte")
-
-	embed = discord.Embed(
-		title=titulo,
-		url=url,
-		color=discord.Color.blue(),
-	)
-	embed.set_footer(text="Tech Girls • Vagas de Tecnologia")
-
-	return embed, VagaView(url=url, fonte=fonte)
-
+from utils.embeds import criar_embed_vaga
 
 class JobsTasksBot(commands.Cog):
 	def __init__(self, bot: commands.Bot):
@@ -42,11 +10,11 @@ class JobsTasksBot(commands.Cog):
 		self.fila_vagas: list[dict] = []
 		self.vagas_vistas: set[str] = set()
 
-	async def cog_load(self):
-		if not self.busca_vagas_task.is_running():
-			self.busca_vagas_task.start()
-		if not self.envio_vagas_task.is_running():
-			self.envio_vagas_task.start()
+	#async def cog_load(self):
+		#if not self.busca_vagas_task.is_running():
+			#self.busca_vagas_task.start()
+		#if not self.envio_vagas_task.is_running():
+			#self.envio_vagas_task.start()
 
 	def cog_unload(self):
 		if self.busca_vagas_task.is_running():
@@ -54,9 +22,9 @@ class JobsTasksBot(commands.Cog):
 		if self.envio_vagas_task.is_running():
 			self.envio_vagas_task.cancel()
 
-	@tasks.loop(hours=4)  # Executa a requisicao de busca a cada 4 horas
+	@tasks.loop(minutes=1)  # Executa a requisicao de busca a cada 4 horas
 	async def busca_vagas_task(self):
-		canais = buscar_servidores()
+		canais = buscar_servidores("vagas")
 		if not canais:
 			print("[JobsTask] Nenhum canal configurado. Busca cancelada neste ciclo.")
 			return
@@ -86,12 +54,12 @@ class JobsTasksBot(commands.Cog):
 	async def busca_vagas_task_error(self, error):
 		print(f"[JobsTask] Erro na busca de vagas: {error}")
 
-	@tasks.loop(minutes=15)
+	@tasks.loop(minutes=1)
 	async def envio_vagas_task(self):
 		if not self.fila_vagas:
 			return
 
-		canais = buscar_servidores()
+		canais = buscar_servidores("vagas")
 		if not canais:
 			return
 

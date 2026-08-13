@@ -1,6 +1,6 @@
 import discord
 
-
+#Embeds para as noticias
 class NoticiaView(discord.ui.View): # Botao de ver mais
 
     def __init__(self, url: str | None):
@@ -46,3 +46,35 @@ def criar_embed_noticia(
     embed.set_footer(text="Tech Girls • Noticias da Tecnologia")
 
     return embed, NoticiaView(url=url)
+
+
+#Embeds para as vagas
+class VagaView(discord.ui.View):
+	def __init__(self, url: str, fonte: str | None = None):
+		super().__init__()
+		label = "Acessar vaga"
+		if fonte:
+			label = f"Ver no {fonte}"[:80]
+		self.add_item(
+			discord.ui.Button(
+				label=label,
+				url=url,
+				style=discord.ButtonStyle.link,
+				emoji="🔗",
+			)
+		)
+
+
+def criar_embed_vaga(vaga: dict) -> tuple[discord.Embed, discord.ui.View]:
+	titulo = vaga.get("titulo") or "Vaga Tech"
+	url = vaga.get("link") or ""
+	fonte = vaga.get("fonte")
+
+	embed = discord.Embed(
+		title=titulo,
+		url=url,
+		color=discord.Color.blue(),
+	)
+	embed.set_footer(text="Tech Girls • Vagas de Tecnologia")
+
+	return embed, VagaView(url=url, fonte=fonte)

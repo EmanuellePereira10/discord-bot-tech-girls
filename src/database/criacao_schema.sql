@@ -7,7 +7,9 @@ CREATE TABLE IF NOT EXISTS canais_configurados (
     id_canal INTEGER PRIMARY KEY,
     id_guild TEXT,
     id_channel TEXT,
-    criado_em TEXT
+    tipo TEXT,
+    criado_em TEXT,
+    UNIQUE (id_guild, tipo)
 );
 
 -- Tabela: noticias_postadas

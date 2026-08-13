@@ -147,10 +147,9 @@ async def search_jobs(limit: int = 8) -> list[dict[str, Any]]:
 					"country": JSEARCH_COUNTRY,
 					"date_posted": JSEARCH_DATE_POSTED,
 				}
-				# response = await client.get(JSEARCH_URL, headers=headers, params=params)
-				# response.raise_for_status()
+				response = await client.get(JSEARCH_URL, headers=headers, params=params)
+				response.raise_for_status()
 				print("[Jobs] Requisicao externa desativada temporariamente para testes locais.")
-				return []
 
 				payload = response.json()
 				dados = _extrair_jobs_do_payload(payload)
